@@ -1,0 +1,72 @@
+---
+title: "dplyr for ROI data wrangling"
+author: "Brian Caffo"
+date: "April 14, 2017"
+output:
+  ioslides_presentation: default
+  slidy_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## dplyr
+
+- `dplyr` is a package for manipulating data in R
+- It is an essential tool for working with ROI structural data
+- Requires that you get your data into a *data frame* before starting
+- 
+
+## magrittr
+
+- `magrittr` is a package that is very useful along with dplyr
+- "The magrittr package offers a set of operators which promote semantics that will improve your code" 
+- ` install.packages("magrittr")` 
+- Here's what it does. It converts code like this:
+
+
+```{r, eval = FALSE, echo = TRUE}
+a = f(b)
+a = g(a, c)
+a = h(a, d)
+```
+
+with code like this
+
+```{r, eval = FALSE, echo = TRUE}
+a = f(b) %>% g(c) %>% h(d)
+```
+
+## dplyr
+- Back to `dplyr`. This is a package for manipulating and wrangling data frames
+- `dplyr` includes a collection of verbs for manipulating data, we'll go through them one at a time
+- [https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html)
+- The main ones for me are: `filter`, `select`, `mutate`, `summarise`
+
+
+## Example data
+
+```{r,echo=FALSE}
+source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
+source("~/sandboxes/MRIcloudT1volumetrics/R/splitFileName.R")
+source("~/sandboxes/MRIcloudT1volumetrics/R/subject2df.R")
+source("~/sandboxes/MRIcloudT1volumetrics/R/utils.R")
+```
+
+```{r}
+library(dplyr)
+roiDir = "data/"
+fileList = dir(roiDir)
+##includes all types and levels
+dat = readSubject(paste(roiDir, fileList[1], sep = "")) %>% subject2df
+dim(dat)
+## just look at the first level
+filter(dat, type == 1, level == 1)
+```
+
+## Create ICV normalized volumes
+```{r}
+dat %>%  mutate(norm.v
+```
+
