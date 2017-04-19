@@ -1,15 +1,15 @@
 ---
-title: "ReadingInData"
+title: "Reading In MRIcloud Data"
 author: "Brian Caffo"
 date: "April 18, 2017"
 output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Reading in T1 Volumetric output and working with it
+## Reading in T1 Volumetric output and working with it
 
 - MRICloud formats structrual and functional output in
 a text format
@@ -18,16 +18,17 @@ output
 - We're creating a set of utilies for working with MRICloud output
 - We'll discuss T1 output today
 
-### Example T1 output
+## Example T1 output
 
 ```{r}
 ##working in the directory where the ROIs are at
 roiDir = "../data/"
 fileList = dir(roiDir)
-subjects = sapply(strsplit(fileList, "_"), function(x) x[2])
+## grab the subject id
+subjects = sapply(strsplit(fileList, "_"), function(x) x[1])
 ```
 
-### These have to be downloaded from github
+## These have to be downloaded from github
 
 ```{r,echo=FALSE}
 source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
@@ -43,59 +44,62 @@ source("subject2df.R")
 source("utils.R")
 ```
 
-Read in a subject (this just grabs volume)
-===
+## Read in a subject 
+
+- This just grabs volume
+- Uses the readSubject function from `MRIcloudT1volumetrics`
+
 ```{r}
 fullPath = paste(roiDir, fileList[1], sep = "")
 dat = readSubject(fullPath)
 length(dat)
+```
+
+10 for two types and 5 levels, each type/level combo is a list element
+
+## Data is a list
+
+```{r}
 dat[[1]]
 ```
 
-Turns the whole subject into a data frame
-===
+## Turns the whole subject into a data frame
 ```{r}
 dat = subject2df(dat)
-##makes printing easier gets rid of the id variable
+##makes printing easier gets rid of the id variable which is the filename
 dat$rawid = NULL 
-head(dat, 20)
+head(dat, 5)
 ```
 
-Adds ICV variable
-===
-```{r}
+## Adds ICV variable
+```{r, warning = FALSE, message = FALSE}
 dat = addSubjectICV(dat)
-head(dat)
+head(dat, 5)
 ```
 
-Adds Subject TBV variable
-===
-```{r}
+## Adds Subject TBV variable
+```{r, warning = FALSE, message = FALSE}
 dat = addSubjectTBV(dat)
-head(dat)
+head(dat, 5)
 ```
 
-Doing things manually
-===
+## Doing things manually
 ```{r}
 fullData = readLines(fullPath)
 ##print out part of it
 cat(substr(fullData[11 : 18], start = 20, stop = 60), sep = "\n")
 ```
 
-Parsing the text data
-===
+## Parsing the text data
 ```{r}
-toparse = paste(fullData[11 : 18], "",
-                            collapse = "\n")
+toparse = paste(fullData[11 : 18], "", collapse = "\n")
 level1 = read.table(textConnection(toparse),
            fill = TRUE,
            stringsAsFactors = FALSE)
 head(level1[,-1], 3)
 ```
 
-Renaming column names
-===
+## Renaming column names
 ```{r}
 # could get the column names here
 scan(textConnection(fullData[2]), what = "character")
@@ -103,8 +107,7 @@ names(level1) = c("id", "obj", "vol", "min", "max", "mean", "std")
 level1$id = NULL
 ```
 
-Getting ICV and TBV
-===
+## Getting ICV and TBV
 ```{r}
 library(dplyr); library(magrittr)
 level1 %>% mutate(icv = sum(vol * (obj != "CSF")), 
@@ -112,8 +115,7 @@ level1 %>% mutate(icv = sum(vol * (obj != "CSF")),
   select(-min, -max, -mean, -std)
 ```
 
-Other things to try
-===
+## Other things to try
 - Searching the file for headings to parse (this is what readSubject does)
 - Plotting the data (another lecture)
 - Switching between long and short formats (another lecture)
