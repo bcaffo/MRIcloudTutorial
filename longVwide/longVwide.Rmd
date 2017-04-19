@@ -1,0 +1,103 @@
+---
+title: "Long versus wide format"
+author: "Brian Caffo"
+date: "April 19, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "")
+```
+
+## Load in the sample data
+
+```{r,echo=FALSE}
+source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
+source("~/sandboxes/MRIcloudT1volumetrics/R/splitFileName.R")
+source("~/sandboxes/MRIcloudT1volumetrics/R/subject2df.R")
+source("~/sandboxes/MRIcloudT1volumetrics/R/utils.R")
+```
+
+```{r, eval=FALSE}
+source("readSubject.R")
+source("splitFileName.R")
+source("subject2df.R")
+source("utils.R")
+```
+
+## reading in the data
+
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+roiDir = "../data/"
+fileList = dir(roiDir)
+dat = NULL
+for (i in 1 : 2){
+    tempDat = readSubject(paste(roiDir, fileList[i], sep = "")) %>% 
+        subject2df() %>%
+        filter(level == 1, type == 1) %>%
+        mutate(subject = i) %>% 
+        select(roi, volume, subject)
+    dat = rbind(dat, tempDat)
+}
+```
+
+## Long versus wide format
+
+- An important organizational principle for ROI data is long versus wide format
+- Long formats are often useful for analysis software, like multilevel models
+- Wide formats are more compact and useful for data manipulation
+
+
+## Long format
+```{r, echo = FALSE}
+library(tidyr)
+dat
+```
+
+
+## Wide format
+
+Showing the first 5 columns (otherwise I run out of room)
+
+```{r}
+spread(dat, roi, volume)[,1:5]
+```
+
+## Conversions
+
+- R has several wide to long and vice-versa converters
+- Notable is the `reshape2` pacage and `tidyr`
+- Also is the `reshape` function (which has nothing to do with `reshape2`)
+- We're recommending `tidyr` 
+    - `gather` converts from wide to long
+    - `spread` converts from long to wide
+
+## long to wide again
+
+```{r}
+wide = spread(dat, roi, volume)
+```
+
+- `dat` the data frame
+- `roi` the name of column variables
+- `volume` the value of the columns
+
+## Note
+- Note you can't have duplicates since `spread` then can't figure out what to do
+- The following (not evaluated) gives and error since there's duplicate subjects
+
+```{r, echo = TRUE, eval = FALSE}
+tempDat = rbind(dat, dat)
+spread(tempDat, roi, volume
+```
+
+
+## wide back to long
+
+```{r}
+gather(wide, roi, volume, CSF:Telencephalon_R) %>%
+    arrange(subject)
+```
+
+
