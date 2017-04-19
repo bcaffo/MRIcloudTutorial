@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE, comment = "")
 ```
 
 ## dplyr
@@ -16,7 +16,6 @@ knitr::opts_chunk$set(echo = FALSE)
 - `dplyr` is a package for manipulating data in R
 - It is an essential tool for working with ROI structural data
 - Requires that you get your data into a *data frame* before starting
-- 
 
 ## magrittr
 
@@ -41,32 +40,107 @@ a = f(b) %>% g(c) %>% h(d)
 ## dplyr
 - Back to `dplyr`. This is a package for manipulating and wrangling data frames
 - `dplyr` includes a collection of verbs for manipulating data, we'll go through them one at a time
-- [https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html)
+- [Here's a link to the best docs](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html)
 - The main ones for me are: `filter`, `select`, `mutate`, `summarise`
 
 
 ## Example data
 
-```{r,echo=FALSE}
+- We'll work with some example data in the github repo under `data/`
+- Contains two subjects' from the Kirby21 dataset
+
+```{r}
+dir("../data")
+```
+
+
+## Utility functions 
+
+```{r,echo=TRUE}
 source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
 source("~/sandboxes/MRIcloudT1volumetrics/R/splitFileName.R")
 source("~/sandboxes/MRIcloudT1volumetrics/R/subject2df.R")
 source("~/sandboxes/MRIcloudT1volumetrics/R/utils.R")
 ```
 
-```{r}
+## Load in dplyr and read in the data
+```{r, warning = FALSE, message = FALSE, echo = TRUE}
 library(dplyr)
-roiDir = "data/"
+roiDir = "../data/"
 fileList = dir(roiDir)
-##includes all types and levels
-dat = readSubject(paste(roiDir, fileList[1], sep = "")) %>% subject2df
-dim(dat)
-## just look at the first level
-filter(dat, type == 1, level == 1)
+dat = readSubject(paste(roiDir, fileList[1], sep = "")) %>% 
+    subject2df()
+```
+
+## The data set at this point
+
+```{r}
+head(dat, 10)
+```
+
+## Get rid of the id column
+
+- Minus removes columns
+- Otherwise `select` will keep the columns that you specify
+
+```{r}
+dat = select(dat, -rawid)
+head(dat, 10)
+```
+
+## Using filter
+
+- `filter` selects rows of a dataframe based on criteria
+
+```{r, echo= TRUE}
+dat  = filter(dat, type == 1, level == 1)
+dat
 ```
 
 ## Create ICV normalized volumes
+
+- There's already a function to do this in the `MRIcloudt1Volumetrics` repo
+-However, let's do it manually
+
 ```{r}
-dat %>%  mutate(norm.v
+dat = mutate(dat, icv = sum(volume))
+dat
 ```
+
+## Why magrittr is so useful
+
+Everything we've done so far
+
+```{r, eval = FALSE, echo = TRUE}
+dat = readSubject(paste(roiDir, fileList[1], sep = "")) %>% 
+    subject2df() %>%
+    filter(type == 1, level == 1) %>%
+    mutate(icv = sum(volume))
+```
+
+## Let's return to the full data
+```{r}
+fullData = readSubject(paste(roiDir, fileList[1], sep = "")) %>% 
+        subject2df()
+head(fullData)
+```
+
+
+## Summarise
+
+- Question, what's the volumetric sum at each level and type?
+- `summarise` creates summaries
+- `group_by` operates functions over groups
+
+## 
+
+```{r}
+fullData %>% group_by(type, level) %>% 
+    summarise(nvol = n(), sum = sum(volume), mean = mean(volume)) %>%
+    as.data.frame() #just for display
+```
+
+
+
+
 
