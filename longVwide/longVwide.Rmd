@@ -11,35 +11,22 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ## Load in the sample data
 
-```{r,echo=FALSE}
-source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/splitFileName.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/subject2df.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/utils.R")
-```
-
 ```{r, eval=FALSE}
-source("readSubject.R")
-source("splitFileName.R")
-source("subject2df.R")
-source("utils.R")
+## Only if you don't have the package installed
+source("https://neuroconductor.org/neurocLite.R")
+neuro_install("MRIcloudT1volumetrics")
 ```
 
 ## reading in the data
 
 ```{r, warning = FALSE, message = FALSE}
-library(dplyr)
-roiDir = "../data/"
-fileList = dir(roiDir)
-dat = NULL
-for (i in 1 : 2){
-    tempDat = readSubject(paste(roiDir, fileList[i], sep = "")) %>% 
-        subject2df() %>%
-        filter(level == 1, type == 1) %>%
-        mutate(subject = i) %>% 
-        select(roi, volume, subject)
-    dat = rbind(dat, tempDat)
-}
+library(MRIcloudT1volumetrics)
+## Change this to where the data directory is
+roiDir = "~/sandboxes/MRIcloudTutorial/data/"
+fileList = dir(roiDir, full.names = TRUE)
+# by default reads level 5
+dat = readFileList(fileList, level = 1) %>% 
+  select(roi, volume, id)
 ```
 
 ## Long versus wide format
@@ -50,8 +37,8 @@ for (i in 1 : 2){
 
 
 ## Long format
+The data is currently in a long format
 ```{r, echo = FALSE}
-library(tidyr)
 dat
 ```
 
@@ -61,6 +48,7 @@ dat
 Showing the first 5 columns (otherwise I run out of room)
 
 ```{r}
+library(tidyr)
 spread(dat, roi, volume)[,1:5]
 ```
 
