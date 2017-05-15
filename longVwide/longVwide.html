@@ -100,25 +100,23 @@
 
 <slide class=''><hgroup><h2>Load in the sample data</h2></hgroup><article  id="load-in-the-sample-data">
 
-<pre class = 'prettyprint lang-r'>source(&quot;readSubject.R&quot;)
-source(&quot;splitFileName.R&quot;)
-source(&quot;subject2df.R&quot;)
-source(&quot;utils.R&quot;)</pre>
+<p>We&#39;ll use the <code>MRIcloudT1volumetrics</code> package to read in and process the data.</p>
+
+<pre class = 'prettyprint lang-r'>## Only if you don&#39;t have the package installed
+source(&quot;https://neuroconductor.org/neurocLite.R&quot;)
+neuro_install(&quot;MRIcloudT1volumetrics&quot;)</pre>
 
 </article></slide><slide class=''><hgroup><h2>reading in the data</h2></hgroup><article  id="reading-in-the-data">
 
-<pre class = 'prettyprint lang-r'>library(dplyr)
-roiDir = &quot;../data/&quot;
-fileList = dir(roiDir)
-dat = NULL
-for (i in 1 : 2){
-    tempDat = readSubject(paste(roiDir, fileList[i], sep = &quot;&quot;)) %&gt;% 
-        subject2df() %&gt;%
-        filter(level == 1, type == 1) %&gt;%
-        mutate(subject = i) %&gt;% 
-        select(roi, volume, subject)
-    dat = rbind(dat, tempDat)
-}</pre>
+<p>Let&#39;s start by reading in the data and just selecting a few columns.</p>
+
+<pre class = 'prettyprint lang-r'>library(magrittr); library(dplyr); library(MRIcloudT1volumetrics) 
+## Change this to where the data directory is
+roiDir = &quot;~/sandboxes/MRIcloudTutorial/data/&quot;
+fileList = dir(roiDir, full.names = TRUE)
+# by default reads level 5
+dat = readFileList(fileList, level = 1) %&gt;% 
+  select(roi, volume, id)</pre>
 
 </article></slide><slide class=''><hgroup><h2>Long versus wide format</h2></hgroup><article  id="long-versus-wide-format">
 
@@ -130,35 +128,39 @@ for (i in 1 : 2){
 
 </article></slide><slide class=''><hgroup><h2>Long format</h2></hgroup><article  id="long-format">
 
-<pre >Warning: package &#39;tidyr&#39; was built under R version 3.2.5</pre>
+<p>The data is currently in a long format</p>
 
-<pre >               roi volume subject
-1  Telencephalon_L 531111       1
-2  Telencephalon_R 543404       1
-3   Diencephalon_L   9683       1
-4   Diencephalon_R   9678       1
-5    Mesencephalon  10268       1
-6    Metencephalon 159402       1
-7   Myelencephalon   4973       1
-8              CSF 109776       1
-9  Telencephalon_L 545603       2
-10 Telencephalon_R 552216       2
-11  Diencephalon_L   9156       2
-12  Diencephalon_R   9071       2
-13   Mesencephalon  10516       2
-14   Metencephalon 165803       2
-15  Myelencephalon   4912       2
-16             CSF 107334       2</pre>
+<pre >               roi volume id
+1  Telencephalon_L 531111  1
+2  Telencephalon_R 543404  1
+3   Diencephalon_L   9683  1
+4   Diencephalon_R   9678  1
+5    Mesencephalon  10268  1
+6    Metencephalon 159402  1
+7   Myelencephalon   4973  1
+8              CSF 109776  1
+9  Telencephalon_L 545603  2
+10 Telencephalon_R 552216  2
+11  Diencephalon_L   9156  2
+12  Diencephalon_R   9071  2
+13   Mesencephalon  10516  2
+14   Metencephalon 165803  2
+15  Myelencephalon   4912  2
+16             CSF 107334  2</pre>
 
 </article></slide><slide class=''><hgroup><h2>Wide format</h2></hgroup><article  id="wide-format">
 
-<p>Showing the first 5 columns (otherwise I run out of room)</p>
+<p>Here&#39;s the data in a &quot;wide&quot; format. Both formats are useful. The wide one is more compact, while the long one is more useful for statistical models.</p>
 
-<pre class = 'prettyprint lang-r'>spread(dat, roi, volume)[,1:5]</pre>
+<pre class = 'prettyprint lang-r'>library(tidyr)
+spread(dat, roi, volume)</pre>
 
-<pre >  subject    CSF Diencephalon_L Diencephalon_R Mesencephalon
-1       1 109776           9683           9678         10268
-2       2 107334           9156           9071         10516</pre>
+<pre >  id    CSF Diencephalon_L Diencephalon_R Mesencephalon Metencephalon
+1  1 109776           9683           9678         10268        159402
+2  2 107334           9156           9071         10516        165803
+  Myelencephalon Telencephalon_L Telencephalon_R
+1           4973          531111          543404
+2           4912          545603          552216</pre>
 
 </article></slide><slide class=''><hgroup><h2>Conversions</h2></hgroup><article  id="conversions">
 
@@ -192,30 +194,50 @@ for (i in 1 : 2){
 </ul>
 
 <pre class = 'prettyprint lang-r'>tempDat = rbind(dat, dat)
-spread(tempDat, roi, volume</pre>
+spread(tempDat, roi, volume)</pre>
 
 </article></slide><slide class=''><hgroup><h2>wide back to long</h2></hgroup><article  id="wide-back-to-long">
 
 <pre class = 'prettyprint lang-r'>gather(wide, roi, volume, CSF:Telencephalon_R) %&gt;%
-    arrange(subject)</pre>
+    arrange(id)</pre>
 
-<pre >   subject             roi volume
-1        1             CSF 109776
-2        1  Diencephalon_L   9683
-3        1  Diencephalon_R   9678
-4        1   Mesencephalon  10268
-5        1   Metencephalon 159402
-6        1  Myelencephalon   4973
-7        1 Telencephalon_L 531111
-8        1 Telencephalon_R 543404
-9        2             CSF 107334
-10       2  Diencephalon_L   9156
-11       2  Diencephalon_R   9071
-12       2   Mesencephalon  10516
-13       2   Metencephalon 165803
-14       2  Myelencephalon   4912
-15       2 Telencephalon_L 545603
-16       2 Telencephalon_R 552216</pre></article></slide>
+<pre >   id             roi volume
+1   1             CSF 109776
+2   1  Diencephalon_L   9683
+3   1  Diencephalon_R   9678
+4   1   Mesencephalon  10268
+5   1   Metencephalon 159402
+6   1  Myelencephalon   4973
+7   1 Telencephalon_L 531111
+8   1 Telencephalon_R 543404
+9   2             CSF 107334
+10  2  Diencephalon_L   9156
+11  2  Diencephalon_R   9071
+12  2   Mesencephalon  10516
+13  2   Metencephalon 165803
+14  2  Myelencephalon   4912
+15  2 Telencephalon_L 545603
+16  2 Telencephalon_R 552216</pre>
+
+</article></slide><slide class=''><hgroup><h2>wide back to long</h2></hgroup><article  id="wide-back-to-long-1">
+
+<pre class = 'prettyprint lang-r'>gather(wide, roi, volume, CSF:Telencephalon_R)</pre>
+
+<ul>
+<li><code>wide</code> the data frame in a wide format</li>
+<li><code>roi</code> the name of column <em>name</em> variable that will be created</li>
+<li><code>volume</code> the name of the columne <em>value</em> variable that will be created</li>
+<li><code>CSF:Telencephalon_R</code> the collection of columns being included</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Some thoughts</h2></hgroup><article  id="some-thoughts">
+
+<ul>
+<li>Converting between long and wide formats used to be one of the main annoyances of working with multiple ROIs</li>
+<li>The <code>tidyr</code> functions make this much easier</li>
+<li>It&#39;s probably preferable to keep your data in the long format; this is the <code>tidy</code> specification of the data</li>
+<li>Hadley Wickham has a paper on tidy data (see Journal of Statistical Software vol. 59, 2014) and makes a compelling case for keeping it in this format</li>
+</ul></article></slide>
 
 
   <slide class="backdrop"></slide>
@@ -227,7 +249,7 @@ spread(tempDat, roi, volume</pre>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

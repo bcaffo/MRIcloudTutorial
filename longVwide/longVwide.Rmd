@@ -11,6 +11,9 @@ knitr::opts_chunk$set(echo = TRUE, comment = "")
 
 ## Load in the sample data
 
+We'll use the `MRIcloudT1volumetrics` package to read in 
+and process the data.
+
 ```{r, eval=FALSE}
 ## Only if you don't have the package installed
 source("https://neuroconductor.org/neurocLite.R")
@@ -19,8 +22,11 @@ neuro_install("MRIcloudT1volumetrics")
 
 ## reading in the data
 
+Let's start by reading in the data and just selecting 
+a few columns.
+
 ```{r, warning = FALSE, message = FALSE}
-library(MRIcloudT1volumetrics)
+library(magrittr); library(dplyr); library(MRIcloudT1volumetrics) 
 ## Change this to where the data directory is
 roiDir = "~/sandboxes/MRIcloudTutorial/data/"
 fileList = dir(roiDir, full.names = TRUE)
@@ -45,11 +51,13 @@ dat
 
 ## Wide format
 
-Showing the first 5 columns (otherwise I run out of room)
+Here's the data in a "wide" format. Both formats are useful.
+The wide one is more compact, while the long one is more useful
+for statistical models.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(tidyr)
-spread(dat, roi, volume)[,1:5]
+spread(dat, roi, volume)
 ```
 
 ## Conversions
@@ -77,7 +85,7 @@ wide = spread(dat, roi, volume)
 
 ```{r, echo = TRUE, eval = FALSE}
 tempDat = rbind(dat, dat)
-spread(tempDat, roi, volume
+spread(tempDat, roi, volume)
 ```
 
 
@@ -85,7 +93,26 @@ spread(tempDat, roi, volume
 
 ```{r}
 gather(wide, roi, volume, CSF:Telencephalon_R) %>%
-    arrange(subject)
+    arrange(id)
 ```
 
+## wide back to long
 
+```{r, eval = FALSE}
+gather(wide, roi, volume, CSF:Telencephalon_R)
+```
+
+- `wide` the data frame in a wide format
+- `roi` the name of column *name* variable that will be created
+- `volume` the name of the columne *value* variable that will be created
+- `CSF:Telencephalon_R` the collection of columns being included
+
+
+## Some thoughts
+
+- Converting between long and wide formats used to be one of the main
+annoyances of working with multiple ROIs
+- The `tidyr` functions make this much easier
+- It's probably preferable to keep your data in the long format; this is
+the `tidy` specification of the data
+  - Hadley Wickham has a paper on tidy data (see Journal of Statistical Software vol. 59, 2014) and makes a compelling case for keeping it in this format
