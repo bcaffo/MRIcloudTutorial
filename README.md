@@ -1,5 +1,5 @@
 # mricloudRtutorial
-A repo for the R MRICloud tutorials
+A repo for the R MRICloud tutorials on R and git
 
 - [Reading in T1 data](https://bcaffo.github.io/MRIcloudTutorial/readingInData/readingInMRIcloudData.html#1)
 - [dplyr](https://bcaffo.github.io/MRIcloudTutorial//dplyr/dplyr.html)
