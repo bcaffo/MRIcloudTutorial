@@ -6,3 +6,11 @@ A repo for the R MRICloud tutorials on R and git
 - [Long versus wide formats, tidy data](https://bcaffo.github.com/MRIcloudTutorial/longVwide/longVwide.html)
 - [ggplot2](https://bcaffo.github.com/MRIcloudTutorial/ggplot/ggplot.html)
 
+Todo list
+
+1. Show some group analysis 
+2. Show some plotting
+3. Merging
+4. Text processing of the id variables
+5. Resting state
+
