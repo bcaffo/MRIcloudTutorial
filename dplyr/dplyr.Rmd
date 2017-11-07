@@ -53,19 +53,19 @@ a = f(b) %>% g(c) %>% h(d)
 dir("../data")
 ```
 
+## These have to be downloaded from github
 
-## Utility functions 
-
-```{r,echo=TRUE}
-source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/splitFileName.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/subject2df.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/utils.R")
+```{r, eval=FALSE}
+## Only if you don't have the package installed
+#source("https://neuroconductor.org/neurocLite.R")
+#neuro_install("MRIcloudT1volumetrics")
+require(devtools)
+devtools::install_github("bcaffo/MRIcloudT1volumetrics")
 ```
 
 ## Load in dplyr and read in the data
 ```{r, warning = FALSE, message = FALSE, echo = TRUE}
-library(dplyr)
+library(magrittr); library(dplyr); library(MRIcloudT1volumetrics) 
 roiDir = "../data/"
 fileList = dir(roiDir)
 dat = readSubject(paste(roiDir, fileList[1], sep = "")) %>% 

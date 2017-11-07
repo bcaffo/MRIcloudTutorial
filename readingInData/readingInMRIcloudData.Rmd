@@ -30,18 +30,12 @@ subjects = sapply(strsplit(fileList, "_"), function(x) x[1])
 
 ## These have to be downloaded from github
 
-```{r,echo=FALSE}
-source("~/sandboxes/MRIcloudT1volumetrics/R/readSubject.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/splitFileName.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/subject2df.R")
-source("~/sandboxes/MRIcloudT1volumetrics/R/utils.R")
-```
-
 ```{r, eval=FALSE}
-source("readSubject.R")
-source("splitFileName.R")
-source("subject2df.R")
-source("utils.R")
+## Only if you don't have the package installed
+#source("https://neuroconductor.org/neurocLite.R")
+#neuro_install("MRIcloudT1volumetrics")
+require(devtools)
+devtools::install_github("bcaffo/MRIcloudT1volumetrics")
 ```
 
 ## Read in a subject 
@@ -49,7 +43,11 @@ source("utils.R")
 - This just grabs volume
 - Uses the readSubject function from `MRIcloudT1volumetrics`
 
-```{r}
+```{r, message = FALSE}
+library(magrittr); library(dplyr); library(MRIcloudT1volumetrics) 
+## Change this to where the data directory is
+roiDir = "~/sandboxes/MRIcloudTutorial/data/"
+fileList = dir(roiDir)
 fullPath = paste(roiDir, fileList[1], sep = "")
 dat = readSubject(fullPath)
 length(dat)

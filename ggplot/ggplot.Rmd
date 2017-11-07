@@ -1,0 +1,141 @@
+---
+title: "ggplot"
+author: "Brian Caffo"
+date: "8/22/2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Get ggplot
+```{r, eval=FALSE}
+install.packages("ggplot2")
+library(ggplot2)
+```
+
+## Get MRIcloudT1volumetrics
+```{r, eval=FALSE}
+## Only if you don't have the package installed
+#source("https://neuroconductor.org/neurocLite.R")
+#neuro_install("MRIcloudT1volumetrics")
+require(devtools)
+devtools::install_github("bcaffo/MRIcloudT1volumetrics")
+```
+
+
+## Load up the libraries
+```{r, eval = TRUE, message = FALSE}
+# do this first if needed
+#devtools::install_github("bcaffo/kirby21.mricloud")
+library(magrittr); library(dplyr); 
+library(MRIcloudT1volumetrics); library(kirby21.mricloud)
+library(tidyr); library(ggplot2)
+```
+
+## Organize the list of ids (manually)
+```{r}
+#get the list of filenames
+fileNames = get_txt_filenames(visits = 1, 
+                              file_types =  "volumes_corrected")
+```
+
+## Read in the data
+```{r}
+#read them in
+dat = readFileList(fileNames$filename, 
+                   level= 1, 
+                   type = 1, 
+                   idList = fileNames$Subject_ID) %>%
+  select(id, roi, volume)
+head(dat, 10)
+```
+
+## Average volume with each region
+
+```{r}
+smry = dat %>% group_by(roi) %>% 
+  summarise(roiMean = mean(volume),
+            roiSD = sd(volume), 
+            n = n()
+            ) %>% mutate(roi = as.factor(roi))
+smry
+```
+
+## Using ggplot
+
+```{r, warning = FALSE, message = FALSE, echo = TRUE}
+g = ggplot(smry, aes(x = roi, y = roiMean))
+g = g + geom_col()
+```
+
+## 
+```{r, echo = FALSE}
+g
+```
+
+## Changing the axis angle
+`theme` controls the non data aspects of the plot
+
+```{r}
+g = g + theme(axis.text.x=element_text(angle=90,hjust=1)) 
+```
+
+##
+
+```{r, echo = FALSE}
+g
+```
+
+
+## Creating a stacked bar chart example
+
+Parameters in the `aes` function control aesthetics 
+
+```{r}
+g = ggplot(dat, aes(x = as.factor(id), 
+                    y = volume, 
+                    fill = as.factor(roi))
+           )
+g = g + geom_col()
+```
+
+##
+
+```{r, echo = FALSE}
+g
+```
+
+## Merge with the demographic data
+```{r}
+dat = right_join(kirby21.base::kirby21_demog, 
+                 dat, by = c("Subject_ID" = "id"))
+head(dat, 10)
+```
+
+## Line plot by age
+```{r}
+g = ggplot(dat, aes(x = Age, y = log10(volume), col = roi))
+g = g + geom_line()
+```
+
+##
+
+```{r, echo = FALSE}
+g
+```
+
+## Gender by roi
+```{r}
+smryGender = group_by(dat, Sex, roi) %>% 
+  summarise(roiMean = mean(volume))  %>% 
+  drop_na()
+g = ggplot(smryGender, aes(x = Sex, y = roiMean, fill = roi)) + geom_col()
+```
+
+##
+
+```{r, echo = FALSE}
+g
+```

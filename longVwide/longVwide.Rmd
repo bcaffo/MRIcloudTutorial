@@ -16,11 +16,13 @@ and process the data.
 
 ```{r, eval=FALSE}
 ## Only if you don't have the package installed
-source("https://neuroconductor.org/neurocLite.R")
-neuro_install("MRIcloudT1volumetrics")
+#source("https://neuroconductor.org/neurocLite.R")
+#neuro_install("MRIcloudT1volumetrics")
+require(devtools)
+devtools::install_github("bcaffo/MRIcloudT1volumetrics")
 ```
 
-## reading in the data
+## Reading in the data
 
 Let's start by reading in the data and just selecting 
 a few columns.
@@ -69,7 +71,7 @@ spread(dat, roi, volume)
     - `gather` converts from wide to long
     - `spread` converts from long to wide
 
-## long to wide again
+## Long to wide again
 
 ```{r}
 wide = spread(dat, roi, volume)
@@ -89,14 +91,14 @@ spread(tempDat, roi, volume)
 ```
 
 
-## wide back to long
+## Wide back to long
 
 ```{r}
 gather(wide, roi, volume, CSF:Telencephalon_R) %>%
     arrange(id)
 ```
 
-## wide back to long
+## Wide back to long
 
 ```{r, eval = FALSE}
 gather(wide, roi, volume, CSF:Telencephalon_R)

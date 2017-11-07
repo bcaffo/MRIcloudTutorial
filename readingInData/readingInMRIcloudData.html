@@ -117,10 +117,11 @@ subjects = sapply(strsplit(fileList, &quot;_&quot;), function(x) x[1])</pre>
 
 </article></slide><slide class=''><hgroup><h2>These have to be downloaded from github</h2></hgroup><article  id="these-have-to-be-downloaded-from-github">
 
-<pre class = 'prettyprint lang-r'>source(&quot;readSubject.R&quot;)
-source(&quot;splitFileName.R&quot;)
-source(&quot;subject2df.R&quot;)
-source(&quot;utils.R&quot;)</pre>
+<pre class = 'prettyprint lang-r'>## Only if you don&#39;t have the package installed
+#source(&quot;https://neuroconductor.org/neurocLite.R&quot;)
+#neuro_install(&quot;MRIcloudT1volumetrics&quot;)
+require(devtools)
+devtools::install_github(&quot;bcaffo/MRIcloudT1volumetrics&quot;)</pre>
 
 </article></slide><slide class=''><hgroup><h2>Read in a subject</h2></hgroup><article  id="read-in-a-subject">
 
@@ -129,7 +130,11 @@ source(&quot;utils.R&quot;)</pre>
 <li>Uses the readSubject function from <code>MRIcloudT1volumetrics</code></li>
 </ul>
 
-<pre class = 'prettyprint lang-r'>fullPath = paste(roiDir, fileList[1], sep = &quot;&quot;)
+<pre class = 'prettyprint lang-r'>library(magrittr); library(dplyr); library(MRIcloudT1volumetrics) 
+## Change this to where the data directory is
+roiDir = &quot;~/sandboxes/MRIcloudTutorial/data/&quot;
+fileList = dir(roiDir)
+fullPath = paste(roiDir, fileList[1], sep = &quot;&quot;)
 dat = readSubject(fullPath)
 length(dat)</pre>
 
@@ -141,15 +146,24 @@ length(dat)</pre>
 
 <pre class = 'prettyprint lang-r'>dat[[1]]</pre>
 
-<pre >##                  rawid             roi volume type level
-## 1 kirby127a_3_1_ax.img Telencephalon_L 531111    1     1
-## 2 kirby127a_3_1_ax.img Telencephalon_R 543404    1     1
-## 3 kirby127a_3_1_ax.img  Diencephalon_L   9683    1     1
-## 4 kirby127a_3_1_ax.img  Diencephalon_R   9678    1     1
-## 5 kirby127a_3_1_ax.img   Mesencephalon  10268    1     1
-## 6 kirby127a_3_1_ax.img   Metencephalon 159402    1     1
-## 7 kirby127a_3_1_ax.img  Myelencephalon   4973    1     1
-## 8 kirby127a_3_1_ax.img             CSF 109776    1     1</pre>
+<pre >##                  rawid             roi volume min max     mean     std
+## 1 kirby127a_3_1_ax.img Telencephalon_L 531111   0 374 128.3013 51.8593
+## 2 kirby127a_3_1_ax.img Telencephalon_R 543404   0 300 135.0683 53.6471
+## 3 kirby127a_3_1_ax.img  Diencephalon_L   9683  15 295 193.5488 32.2733
+## 4 kirby127a_3_1_ax.img  Diencephalon_R   9678  10 335 193.7051 32.7869
+## 5 kirby127a_3_1_ax.img   Mesencephalon  10268  55 307 230.8583 29.2249
+## 6 kirby127a_3_1_ax.img   Metencephalon 159402   2 299 138.5200 52.2241
+## 7 kirby127a_3_1_ax.img  Myelencephalon   4973  12 286 199.8497 36.6501
+## 8 kirby127a_3_1_ax.img             CSF 109776   0 258  33.0193 26.3262
+##   type level
+## 1    1     1
+## 2    1     1
+## 3    1     1
+## 4    1     1
+## 5    1     1
+## 6    1     1
+## 7    1     1
+## 8    1     1</pre>
 
 </article></slide><slide class=''><hgroup><h2>Turns the whole subject into a data frame</h2></hgroup><article  id="turns-the-whole-subject-into-a-data-frame">
 
@@ -158,36 +172,42 @@ length(dat)</pre>
 dat$rawid = NULL 
 head(dat, 5)</pre>
 
-<pre >##               roi volume type level
-## 1 Telencephalon_L 531111    1     1
-## 2 Telencephalon_R 543404    1     1
-## 3  Diencephalon_L   9683    1     1
-## 4  Diencephalon_R   9678    1     1
-## 5   Mesencephalon  10268    1     1</pre>
+<pre >##               roi volume min max     mean     std type level
+## 1 Telencephalon_L 531111   0 374 128.3013 51.8593    1     1
+## 2 Telencephalon_R 543404   0 300 135.0683 53.6471    1     1
+## 3  Diencephalon_L   9683  15 295 193.5488 32.2733    1     1
+## 4  Diencephalon_R   9678  10 335 193.7051 32.7869    1     1
+## 5   Mesencephalon  10268  55 307 230.8583 29.2249    1     1</pre>
 
 </article></slide><slide class=''><hgroup><h2>Adds ICV variable</h2></hgroup><article  id="adds-icv-variable">
 
 <pre class = 'prettyprint lang-r'>dat = addSubjectICV(dat)
 head(dat, 5)</pre>
 
-<pre >##               roi volume type level     icv
-## 1 Telencephalon_L 531111    1     1 1378295
-## 2 Telencephalon_R 543404    1     1 1378295
-## 3  Diencephalon_L   9683    1     1 1378295
-## 4  Diencephalon_R   9678    1     1 1378295
-## 5   Mesencephalon  10268    1     1 1378295</pre>
+<pre >##               roi volume min max     mean     std type level     icv
+## 1 Telencephalon_L 531111   0 374 128.3013 51.8593    1     1 1378295
+## 2 Telencephalon_R 543404   0 300 135.0683 53.6471    1     1 1378295
+## 3  Diencephalon_L   9683  15 295 193.5488 32.2733    1     1 1378295
+## 4  Diencephalon_R   9678  10 335 193.7051 32.7869    1     1 1378295
+## 5   Mesencephalon  10268  55 307 230.8583 29.2249    1     1 1378295</pre>
 
 </article></slide><slide class=''><hgroup><h2>Adds Subject TBV variable</h2></hgroup><article  id="adds-subject-tbv-variable">
 
 <pre class = 'prettyprint lang-r'>dat = addSubjectTBV(dat)
 head(dat, 5)</pre>
 
-<pre >##               roi volume type level     icv     tbv
-## 1 Telencephalon_L 531111    1     1 1378295 1268519
-## 2 Telencephalon_R 543404    1     1 1378295 1268519
-## 3  Diencephalon_L   9683    1     1 1378295 1268519
-## 4  Diencephalon_R   9678    1     1 1378295 1268519
-## 5   Mesencephalon  10268    1     1 1378295 1268519</pre>
+<pre >##               roi volume min max     mean     std type level     icv
+## 1 Telencephalon_L 531111   0 374 128.3013 51.8593    1     1 1378295
+## 2 Telencephalon_R 543404   0 300 135.0683 53.6471    1     1 1378295
+## 3  Diencephalon_L   9683  15 295 193.5488 32.2733    1     1 1378295
+## 4  Diencephalon_R   9678  10 335 193.7051 32.7869    1     1 1378295
+## 5   Mesencephalon  10268  55 307 230.8583 29.2249    1     1 1378295
+##       tbv
+## 1 1268519
+## 2 1268519
+## 3 1268519
+## 4 1268519
+## 5 1268519</pre>
 
 </article></slide><slide class=''><hgroup><h2>Doing things manually</h2></hgroup><article  id="doing-things-manually">
 
@@ -206,8 +226,7 @@ cat(substr(fullData[11 : 18], start = 20, stop = 60), sep = &quot;\n&quot;)</pre
 
 </article></slide><slide class=''><hgroup><h2>Parsing the text data</h2></hgroup><article  id="parsing-the-text-data">
 
-<pre class = 'prettyprint lang-r'>toparse = paste(fullData[11 : 18], &quot;&quot;,
-                            collapse = &quot;\n&quot;)
+<pre class = 'prettyprint lang-r'>toparse = paste(fullData[11 : 18], &quot;&quot;, collapse = &quot;\n&quot;)
 level1 = read.table(textConnection(toparse),
            fill = TRUE,
            stringsAsFactors = FALSE)
@@ -265,7 +284,7 @@ level1 %&gt;% mutate(icv = sum(vol * (obj != &quot;CSF&quot;)),
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
