@@ -9,8 +9,7 @@ A repo for the R MRICloud tutorials on R and git
 Todo list
 
 1. Show some group analysis 
-2. Show some plotting
-3. Merging
-4. Text processing of the id variables
-5. Resting state
+2. Merging
+3. Text processing of the id variables
+4. Resting state
 
