@@ -99,8 +99,7 @@ dat
 
 ## Create ICV normalized volumes
 
-- There's already a function to do this in the `MRIcloudt1Volumetrics` repo
--However, let's do it manually
+- Let's create an ICV column
 
 ```{r}
 dat = mutate(dat, icv = sum(volume))
@@ -115,7 +114,7 @@ Everything we've done so far
 dat = readSubject(paste(roiDir, fileList[1], sep = "")) %>% 
     subject2df() %>%
     filter(type == 1, level == 1) %>%
-    mutate(icv = sum(volume))
+    mutate(icv = sum(volumes))
 ```
 
 ## Let's return to the full data
