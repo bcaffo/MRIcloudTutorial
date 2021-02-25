@@ -11,8 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Get ggplot
 ```{r, eval=FALSE}
-install.packages("ggplot2")
-library(ggplot2)
+## Included as part of the tidyverse
+##install.packages("ggplot2")
+##library(ggplot2)
 ```
 
 ## Get MRIcloudT1volumetrics
@@ -20,18 +21,21 @@ library(ggplot2)
 ## Only if you don't have the package installed
 #source("https://neuroconductor.org/neurocLite.R")
 #neuro_install("MRIcloudT1volumetrics")
-require(devtools)
+#require(devtools)
 devtools::install_github("bcaffo/MRIcloudT1volumetrics")
+# do this first if needed
+devtools::install_github("bcaffo/kirby21.mricloud")
+install.packages("kirby21.base")
+
 ```
 
 
 ## Load up the libraries
 ```{r, eval = TRUE, message = FALSE}
-# do this first if needed
-#devtools::install_github("bcaffo/kirby21.mricloud")
-library(magrittr); library(dplyr); 
-library(MRIcloudT1volumetrics); library(kirby21.mricloud)
-library(tidyr); library(ggplot2)
+library(tidyverse)
+library(MRIcloudT1volumetrics)
+library(kirby21.mricloud)
+library(kirby21.base)
 ```
 
 ## Organize the list of ids (manually)
@@ -45,9 +49,8 @@ fileNames = get_txt_filenames(visits = 1,
 ```{r}
 #read them in
 dat = readFileList(fileNames$filename, 
-                   level= 1, 
-                   type = 1, 
                    idList = fileNames$Subject_ID) %>%
+  filter(type == 1, level == 1) %>%
   select(id, roi, volume)
 head(dat, 10)
 ```
@@ -55,7 +58,7 @@ head(dat, 10)
 ## Average volume with each region
 
 ```{r}
-smry = dat %>% group_by(roi) %>% 
+smry = dat %>%  group_by(roi) %>% 
   summarise(roiMean = mean(volume),
             roiSD = sd(volume), 
             n = n()
@@ -126,12 +129,12 @@ g = g + geom_line()
 g
 ```
 
-## Gender by roi
+## sex by roi
 ```{r}
-smryGender = group_by(dat, Sex, roi) %>% 
+smrySex = group_by(dat, Sex, roi) %>% 
   summarise(roiMean = mean(volume))  %>% 
   drop_na()
-g = ggplot(smryGender, aes(x = Sex, y = roiMean, fill = roi)) + geom_col()
+g = ggplot(smrySex, aes(x = Sex, y = roiMean, fill = roi)) + geom_col()
 ```
 
 ##
